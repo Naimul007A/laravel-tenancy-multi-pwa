@@ -15,13 +15,14 @@ interface TenantProps {
     domain: string;
 }
 
-defineProps<{
+const props = defineProps<{
     tenant: TenantProps;
     status?: string;
+    initialEmail?: string;
 }>();
 
 const form = useForm({
-    email: '',
+    email: props.initialEmail ?? '',
     password: '',
     remember: false,
 });

@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Tenant;
 
@@ -13,30 +13,34 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class TenantAuthController extends Controller {
+class TenantAuthController extends Controller
+{
     /**
      * Show the tenant login page.
      */
-    public function showLogin(): Response {
+    public function showLogin(Request $request): Response
+    {
         $tenant = tenant();
         $domain = $tenant instanceof Tenant ? $tenant->getPrimaryDomain() : null;
 
         return Inertia::render('tenant/Login', [
             'tenant' => [
-                'id'     => tenant('id'),
-                'name'   => tenant('name') ?? tenant('id'),
-                'domain' => $domain ?? request()->getHost(),
+                'id' => tenant('id'),
+                'name' => tenant('name') ?? tenant('id'),
+                'domain' => $domain ?? $request->getHost(),
             ],
-            'status' => session('status'),
+            'status' => session('status') ?? $request->query('status'),
+            'initialEmail' => (string) $request->query('email', ''),
         ]);
     }
 
     /**
      * Authenticate the tenant user.
      */
-    public function login(Request $request): RedirectResponse {
+    public function login(Request $request): RedirectResponse
+    {
         $credentials = $request->validate([
-            'email'    => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ]);
 
@@ -54,7 +58,8 @@ class TenantAuthController extends Controller {
     /**
      * Log the tenant user out.
      */
-    public function logout(Request $request): RedirectResponse {
+    public function logout(Request $request): RedirectResponse
+    {
         Auth::logout();
 
         $request->session()->invalidate();

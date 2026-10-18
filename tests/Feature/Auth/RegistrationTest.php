@@ -20,8 +20,10 @@ test('new users can register', function () {
         'password_confirmation' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $this->assertGuest();
+    $centralDomain = (array) config('tenancy.central_domains', ['localhost']);
+    $baseDomain = $centralDomain[0] ?? 'localhost';
+    $response->assertRedirectContains('test-user.'.$baseDomain.'/login');
 });
 
 test('new users can register and create a tenant with subdomain', function () {
@@ -33,7 +35,7 @@ test('new users can register and create a tenant with subdomain', function () {
         'password_confirmation' => 'password',
     ]);
 
-    $this->assertAuthenticated();
+    $this->assertGuest();
     $this->assertDatabaseHas('tenants', [
         'id' => 'acme-corp',
     ]);
@@ -48,4 +50,7 @@ test('new users can register and create a tenant with subdomain', function () {
         'email' => 'admin@acme.com',
         'tenant_id' => 'acme-corp',
     ]);
+
+    $response->assertRedirectContains('acme-corp.'.$baseDomain.'/login');
+    $response->assertRedirectContains('admin%40acme.com');
 });
