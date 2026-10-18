@@ -12,9 +12,11 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Tenant extends BaseTenant
 {
-    /** @use HasFactory<TenantFactory> */
     use HasDomains;
+
+    /** @use HasFactory<TenantFactory> */
     use HasFactory;
+
     use HasScopedValidationRules;
 
     /**

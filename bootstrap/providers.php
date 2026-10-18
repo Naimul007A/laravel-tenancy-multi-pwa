@@ -9,4 +9,3 @@ return [
     FortifyServiceProvider::class,
     TenancyServiceProvider::class,
 ];
-
