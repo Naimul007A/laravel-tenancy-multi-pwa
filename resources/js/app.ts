@@ -41,3 +41,19 @@ initializeTheme();
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
+
+// Multi-Tenant Dual-PWA Scoped Service Worker Registration
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    const isStaff = window.location.pathname.startsWith('/staff');
+    const isUsers = window.location.pathname.startsWith('/users');
+
+    if (isStaff || isUsers) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker
+                .register('/sw.js', { scope: isStaff ? '/staff/' : '/users/' })
+                .catch((error) => {
+                    console.error('PWA Service Worker registration failed:', error);
+                });
+        });
+    }
+}

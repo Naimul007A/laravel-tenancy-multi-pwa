@@ -46,7 +46,7 @@ class RegisterResponse implements RegisterResponseContract
                 'status' => 'Workspace created successfully! Please sign in with your credentials.',
             ]);
 
-            $targetUrl = "{$tenantDomain}/login?{$query}";
+            $targetUrl = "{$tenantDomain}/staff/login?{$query}";
         } else {
             $targetUrl = route('login');
         }

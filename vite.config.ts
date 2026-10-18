@@ -32,6 +32,9 @@ export default defineConfig({
         }),
     ]),
     server: {
+        host: 'localhost',
+        cors: true,
+        hmr: { host: 'localhost' },
         watch: {
             ignored: [
                 '**/.agents/**',

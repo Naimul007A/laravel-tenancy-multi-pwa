@@ -36,6 +36,26 @@
 
         @fonts
 
+        @php
+            $portal = request()->is('staff*') ? 'staff' : (request()->is('users*') ? 'users' : null);
+            if ($portal && tenancy()->initialized) {
+                $tenantName = tenant('short_name') ?? tenant('name') ?? config('app.name');
+                $appTitle = $portal === 'staff' ? "{$tenantName} Staff" : $tenantName;
+                $themeColor = $portal === 'staff'
+                    ? (tenant('staff_theme_color') ?? '#0f172a')
+                    : (tenant('user_theme_color') ?? '#4f46e5');
+                $appleIcon = $portal === 'staff' ? '/icons/staff-192x192.png' : '/icons/user-192x192.png';
+            }
+        @endphp
+
+        @if(isset($portal) && $portal && tenancy()->initialized)
+            <link rel="manifest" href="{{ route('pwa.manifest', ['portal' => $portal]) }}">
+            <meta name="theme-color" content="{{ $themeColor }}">
+            <meta name="apple-mobile-web-app-capable" content="yes">
+            <meta name="apple-mobile-web-app-title" content="{{ $appTitle }}">
+            <link rel="apple-touch-icon" href="{{ $appleIcon }}">
+        @endif
+
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
             <title>{{ config('app.name', 'Laravel') }}</title>

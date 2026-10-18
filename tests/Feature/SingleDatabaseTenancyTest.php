@@ -91,7 +91,7 @@ test('tenant route can be resolved via tenant domain', function () {
 
     $response = $this->get('http://alpha.'.$baseDomain.'/');
 
-    $response->assertRedirect('http://alpha.'.$baseDomain.'/login');
+    $response->assertRedirect('http://alpha.'.$baseDomain.'/staff/login');
 });
 
 test('prevent access to tenant routes from central domains', function () {

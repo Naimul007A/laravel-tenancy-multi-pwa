@@ -17,7 +17,21 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
-        $middleware->redirectGuestsTo(fn (Request $request) => tenancy()->initialized ? route('tenant.login') : route('login'));
+        $middleware->redirectGuestsTo(function (Request $request): string {
+            if (tenancy()->initialized) {
+                if ($request->is('staff*')) {
+                    return route('tenant.staff.login');
+                }
+
+                if ($request->is('users*')) {
+                    return route('tenant.users.login');
+                }
+
+                return route('tenant.staff.login');
+            }
+
+            return route('login');
+        });
 
         $middleware->web(append: [
             HandleAppearance::class,

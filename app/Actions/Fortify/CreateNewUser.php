@@ -43,9 +43,18 @@ class CreateNewUser implements CreatesNewUsers
                 ? Str::lower($input['subdomain'])
                 : $this->generateSubdomain($input['name']);
 
+            $companyName = $input['company_name'] ?? ($input['name']."'s Workspace");
+
             $tenant = Tenant::create([
                 'id' => $subdomain,
-                'name' => $input['company_name'] ?? ($input['name']."'s Workspace"),
+                'name' => $companyName,
+                'short_name' => Str::limit($companyName, 30, ''),
+                'staff_theme_color' => '#0f172a',
+                'user_theme_color' => '#4f46e5',
+                'staff_icon_192' => '/icons/staff-192x192.png',
+                'staff_icon_512' => '/icons/staff-512x512.png',
+                'user_icon_192' => '/icons/user-192x192.png',
+                'user_icon_512' => '/icons/user-512x512.png',
             ]);
 
             $host = request()->getHost();
@@ -62,6 +71,7 @@ class CreateNewUser implements CreatesNewUsers
                 'email' => $input['email'],
                 'password' => $input['password'],
                 'tenant_id' => $tenant->id,
+                'role' => 'both',
             ]);
         });
     }

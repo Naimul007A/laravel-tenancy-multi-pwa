@@ -23,7 +23,7 @@ test('new users can register', function () {
     $this->assertGuest();
     $centralDomain = (array) config('tenancy.central_domains', ['localhost']);
     $baseDomain = $centralDomain[0] ?? 'localhost';
-    $response->assertRedirectContains('test-user.'.$baseDomain.'/login');
+    $response->assertRedirectContains('test-user.'.$baseDomain.'/staff/login');
 });
 
 test('new users can register and create a tenant with subdomain', function () {
@@ -51,6 +51,6 @@ test('new users can register and create a tenant with subdomain', function () {
         'tenant_id' => 'acme-corp',
     ]);
 
-    $response->assertRedirectContains('acme-corp.'.$baseDomain.'/login');
+    $response->assertRedirectContains('acme-corp.'.$baseDomain.'/staff/login');
     $response->assertRedirectContains('admin%40acme.com');
 });

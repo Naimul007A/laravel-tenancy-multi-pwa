@@ -27,45 +27,53 @@ beforeEach(function () {
     ]);
 });
 
-test('tenant login page can be rendered on tenant subdomain', function () {
-    $response = $this->get("http://{$this->domain}/login");
+test('staff login page can be rendered on tenant subdomain', function () {
+    $response = $this->get("http://{$this->domain}/staff/login");
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('tenant/Login')
+            ->component('tenant/staff/Login')
             ->where('tenant.id', 'acme')
-            ->where('tenant.name', 'Acme Corporation')
-            ->where('tenant.domain', $this->domain)
         );
 });
 
-test('tenant root route redirects to login for guests', function () {
-    $response = $this->get("http://{$this->domain}/");
+test('users login page can be rendered on tenant subdomain', function () {
+    $response = $this->get("http://{$this->domain}/users/login");
 
-    $response->assertRedirect("http://{$this->domain}/login");
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('tenant/users/Login')
+            ->where('tenant.id', 'acme')
+        );
 });
 
-test('tenant user can log in to their tenant workspace', function () {
-    $response = $this->post("http://{$this->domain}/login", [
+test('tenant root route redirects to staff login for guests', function () {
+    $response = $this->get("http://{$this->domain}/");
+
+    $response->assertRedirect("http://{$this->domain}/staff/login");
+});
+
+test('staff user can log in to their staff workspace', function () {
+    $response = $this->post("http://{$this->domain}/staff/login", [
         'email' => 'user@acme.com',
         'password' => 'secret-password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect("http://{$this->domain}/dashboard");
+    expect(auth()->guard('staff')->check())->toBeTrue();
+    $response->assertRedirect("http://{$this->domain}/staff/dashboard");
 });
 
-test('tenant login fails with invalid credentials', function () {
-    $response = $this->post("http://{$this->domain}/login", [
+test('staff login fails with invalid credentials', function () {
+    $response = $this->from("http://{$this->domain}/staff/login")->post("http://{$this->domain}/staff/login", [
         'email' => 'user@acme.com',
         'password' => 'wrong-password',
     ]);
 
-    $this->assertGuest();
+    expect(auth()->guard('staff')->check())->toBeFalse();
     $response->assertSessionHasErrors('email');
 });
 
-test('user from another tenant cannot log into this tenant workspace', function () {
+test('user from another tenant cannot log into this tenant staff portal', function () {
     $otherDomain = 'other.'.$this->baseDomain;
     $otherTenant = Tenant::create(['id' => 'other', 'name' => 'Other Corp']);
     $otherTenant->createDomain(['domain' => $otherDomain]);
@@ -75,48 +83,41 @@ test('user from another tenant cannot log into this tenant workspace', function 
         'email' => 'other@corp.com',
         'password' => Hash::make('secret-password'),
         'tenant_id' => 'other',
+        'role' => 'both',
     ]);
 
     // Try to log into acme tenant with other tenant user credentials
-    $response = $this->post("http://{$this->domain}/login", [
+    $response = $this->from("http://{$this->domain}/staff/login")->post("http://{$this->domain}/staff/login", [
         'email' => 'other@corp.com',
         'password' => 'secret-password',
     ]);
 
-    $this->assertGuest();
+    expect(auth()->guard('staff')->check())->toBeFalse();
     $response->assertSessionHasErrors('email');
 });
 
-test('unauthenticated user cannot access tenant dashboard', function () {
-    $response = $this->get("http://{$this->domain}/dashboard");
+test('unauthenticated user cannot access staff dashboard', function () {
+    $response = $this->get("http://{$this->domain}/staff/dashboard");
 
-    $response->assertRedirect("http://{$this->domain}/login");
+    $response->assertRedirect("http://{$this->domain}/staff/login");
 });
 
-test('authenticated tenant user can access tenant dashboard', function () {
-    $response = $this->actingAs($this->user)
-        ->get("http://{$this->domain}/dashboard");
+test('authenticated staff user can access staff dashboard', function () {
+    $response = $this->actingAs($this->user, 'staff')
+        ->get("http://{$this->domain}/staff/dashboard");
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('tenant/Dashboard')
+            ->component('tenant/staff/Dashboard')
             ->where('tenant.id', 'acme')
-            ->where('tenant.name', 'Acme Corporation')
             ->where('user.email', 'user@acme.com')
         );
 });
 
-test('authenticated tenant root route redirects to dashboard', function () {
-    $response = $this->actingAs($this->user)
-        ->get("http://{$this->domain}/");
+test('authenticated staff user can log out', function () {
+    $response = $this->actingAs($this->user, 'staff')
+        ->post("http://{$this->domain}/staff/logout");
 
-    $response->assertRedirect("http://{$this->domain}/dashboard");
-});
-
-test('authenticated tenant user can log out', function () {
-    $response = $this->actingAs($this->user)
-        ->post("http://{$this->domain}/logout");
-
-    $this->assertGuest();
-    $response->assertRedirect("http://{$this->domain}/login");
+    expect(auth()->guard('staff')->check())->toBeFalse();
+    $response->assertRedirect("http://{$this->domain}/staff/login");
 });

@@ -14,6 +14,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 /**
  * @property int $id
  * @property string|null $tenant_id
+ * @property string $role
  * @property string $name
  * @property string $email
  * @property Carbon|null $email_verified_at
@@ -26,12 +27,28 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property Carbon|null $updated_at
  * @property-read Tenant|null $tenant
  */
-#[Fillable(['name', 'email', 'password', 'tenant_id'])]
+#[Fillable(['name', 'email', 'password', 'tenant_id', 'role'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use BelongsToTenant, HasFactory, Notifiable;
+
+    /**
+     * Determine if the user has access to the staff portal.
+     */
+    public function isStaff(): bool
+    {
+        return in_array($this->role, ['staff', 'both'], true);
+    }
+
+    /**
+     * Determine if the user has access to the user/parent/student portal.
+     */
+    public function isUser(): bool
+    {
+        return in_array($this->role, ['user', 'both'], true);
+    }
 
     /**
      * Get the attributes that should be cast.
