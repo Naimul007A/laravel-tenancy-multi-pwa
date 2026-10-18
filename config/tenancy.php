@@ -24,9 +24,7 @@ return [
      * Only relevant if you're using the domain or subdomain identification middleware.
      */
     'central_domains' => [
-        'localhost',
-        '127.0.0.1',
-        'tenancy-pwa-test.test',
+        parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost',
     ],
 
     /**

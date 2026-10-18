@@ -9,6 +9,13 @@ export type User = {
     [key: string]: unknown;
 };
 
+export type Tenant = {
+    id: string;
+    name: string;
+    domain?: string;
+};
+
 export type Auth = {
     user: User;
+    tenant?: Tenant | null;
 };

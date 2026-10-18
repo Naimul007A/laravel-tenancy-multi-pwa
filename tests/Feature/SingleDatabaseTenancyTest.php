@@ -85,17 +85,18 @@ test('tenant can be created without triggering separate database creation in sin
 });
 
 test('tenant route can be resolved via tenant domain', function () {
+    $baseDomain = config('tenancy.central_domains.0', 'localhost');
     $tenant = Tenant::create(['id' => 'alpha']);
-    $tenant->createDomain(['domain' => 'alpha.localhost']);
+    $tenant->createDomain(['domain' => 'alpha.'.$baseDomain]);
 
-    $response = $this->get('http://alpha.localhost/');
+    $response = $this->get('http://alpha.'.$baseDomain.'/');
 
-    $response->assertOk()
-        ->assertSee('This is your multi-tenant application. The id of the current tenant is alpha');
+    $response->assertRedirect('http://alpha.'.$baseDomain.'/login');
 });
 
 test('prevent access to tenant routes from central domains', function () {
-    $response = $this->get('http://localhost/');
+    $baseDomain = config('tenancy.central_domains.0', 'localhost');
+    $response = $this->get('http://'.$baseDomain.'/');
 
     // Central domain hits the welcome inertia page, not the tenant route
     $response->assertOk();

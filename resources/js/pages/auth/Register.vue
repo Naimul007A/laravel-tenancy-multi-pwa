@@ -12,6 +12,7 @@ import { store } from '@/routes/register';
 
 defineProps<{
     passwordRules: string;
+    centralDomain?: string;
 }>();
 
 defineOptions({
@@ -59,6 +60,26 @@ defineOptions({
                     placeholder="email@example.com"
                 />
                 <InputError :message="errors.email" />
+            </div>
+
+            <div class="grid gap-2">
+                <Label for="subdomain">Workspace Subdomain</Label>
+                <div class="flex items-center gap-1.5">
+                    <Input
+                        id="subdomain"
+                        type="text"
+                        required
+                        :tabindex="3"
+                        autocomplete="off"
+                        name="subdomain"
+                        placeholder="your-workspace"
+                        class="lowercase"
+                    />
+                    <span class="rounded-md border border-input bg-muted px-2.5 py-1.5 text-xs font-medium text-muted-foreground whitespace-nowrap">
+                        .{{ centralDomain || 'localhost' }}
+                    </span>
+                </div>
+                <InputError :message="errors.subdomain" />
             </div>
 
             <div class="grid gap-2">

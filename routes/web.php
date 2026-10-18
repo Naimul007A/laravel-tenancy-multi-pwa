@@ -2,14 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 
-foreach (config('tenancy.central_domains', []) as $domain) {
-    Route::domain($domain)->group(function () {
-        Route::inertia('/', 'Welcome')->name('home');
+$centralDomain = config('tenancy.central_domains.0', 'localhost');
 
-        Route::middleware(['auth', 'verified'])->group(function () {
-            Route::inertia('dashboard', 'Dashboard')->name('dashboard');
-        });
+Route::domain($centralDomain)->group(function () {
+    Route::inertia('/', 'Welcome')->name('home');
 
-        require __DIR__.'/settings.php';
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::inertia('dashboard', 'Dashboard')->name('dashboard');
     });
-}
+
+    require __DIR__.'/settings.php';
+});

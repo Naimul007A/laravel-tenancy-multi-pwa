@@ -7,8 +7,10 @@ namespace App\Providers;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Stancl\JobPipeline\JobPipeline;
+use Stancl\Tenancy\Contracts\Tenant;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -72,11 +74,25 @@ class TenancyServiceProvider extends ServiceProvider
             Events\InitializingTenancy::class => [],
             Events\TenancyInitialized::class => [
                 Listeners\BootstrapTenancy::class,
+                function (Events\TenancyInitialized $event): void {
+                    $tenant = $event->tenancy->tenant;
+
+                    if ($tenant instanceof Tenant) {
+                        URL::defaults([
+                            'subdomain' => (string) $tenant->getTenantKey(),
+                        ]);
+                    }
+                },
             ],
 
             Events\EndingTenancy::class => [],
             Events\TenancyEnded::class => [
                 Listeners\RevertToCentralContext::class,
+                function (): void {
+                    URL::defaults([
+                        'subdomain' => null,
+                    ]);
+                },
             ],
 
             Events\BootstrappingTenancy::class => [],

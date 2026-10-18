@@ -63,9 +63,16 @@ class FortifyServiceProvider extends ServiceProvider
             'status' => $request->session()->get('status'),
         ]));
 
-        Fortify::registerView(fn () => Inertia::render('auth/Register', [
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
-        ]));
+        Fortify::registerView(function (Request $request) {
+            $host = $request->getHost();
+            $centralDomains = (array) config('tenancy.central_domains', ['localhost']);
+            $centralDomain = in_array($host, $centralDomains, true) ? $host : ($centralDomains[0] ?? 'localhost');
+
+            return Inertia::render('auth/Register', [
+                'passwordRules' => Password::defaults()->toPasswordRulesString(),
+                'centralDomain' => $centralDomain,
+            ]);
+        });
 
     }
 
