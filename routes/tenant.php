@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Tenant\PwaAppController;
 use App\Http\Controllers\Tenant\PwaManifestController;
 use App\Http\Controllers\Tenant\ServiceWorkerController;
 use App\Http\Controllers\Tenant\StaffAuthController;
@@ -52,6 +53,8 @@ Route::middleware([
 
     // Portal A: Staff & Teachers (/staff/*)
     Route::prefix('staff')->group(function () {
+        Route::get('app', [PwaAppController::class, 'staffApp'])->name('tenant.staff.app');
+
         Route::middleware('guest:staff')->group(function () {
             Route::get('login', [StaffAuthController::class, 'showLogin'])->name('tenant.staff.login');
             Route::post('login', [StaffAuthController::class, 'login'])->name('tenant.staff.login.store');
@@ -65,6 +68,8 @@ Route::middleware([
 
     // Portal B: Students & Parents (/users/*)
     Route::prefix('users')->group(function () {
+        Route::get('app', [PwaAppController::class, 'usersApp'])->name('tenant.users.app');
+
         Route::middleware('guest:web')->group(function () {
             Route::get('login', [UserAuthController::class, 'showLogin'])->name('tenant.users.login');
             Route::post('login', [UserAuthController::class, 'login'])->name('tenant.users.login.store');

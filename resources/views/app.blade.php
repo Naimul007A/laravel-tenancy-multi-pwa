@@ -17,6 +17,31 @@
                     }
                 }
             })();
+
+            // Force PWA Installation: redirect non-standalone web visitors to /{portal}/app
+            (function() {
+                try {
+                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                                         (window.navigator && window.navigator.standalone === true) ||
+                                         new URLSearchParams(window.location.search).get('standalone') === '1' ||
+                                         document.cookie.indexOf('pwa_bypass=1') !== -1 ||
+                                         new URLSearchParams(window.location.search).get('bypass') === '1';
+
+                    if (isStandalone) {
+                        document.cookie = "pwa_standalone=1; path=/; max-age=31536000; SameSite=Lax";
+                        return;
+                    }
+
+                    const path = window.location.pathname;
+                    if (path.startsWith('/staff') && path !== '/staff/app') {
+                        window.location.replace('/staff/app');
+                    } else if (path.startsWith('/users') && path !== '/users/app') {
+                        window.location.replace('/users/app');
+                    }
+                } catch (e) {
+                    // Ignore detection errors in headless / non-standard environments
+                }
+            })();
         </script>
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
